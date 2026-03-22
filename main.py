@@ -1,35 +1,66 @@
 import psutil
 import cpuinfo
 import customtkinter as ctk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
-def setup():
-  global app
-  app = ctk.CTk()
-  app.geometry("400x240")
-  app.title("CustomTkinter App")
-setup()
+# Setup window
+global app
+app = ctk.CTk()
+app.geometry("400x700")
+app.title("System Resource Manager")
 
 # get CPU cores
 cpucores = psutil.cpu_count(logical=True)
+
 # CPU information
 cpu_info_label = ctk.CTkLabel(master=app, text=cpuinfo.get_cpu_info()["brand_raw"])
 cpu_info_label.grid(column=0, row=0, padx=10, pady=5, columnspan=cpucores)
 
 # add CPU usage bars and grid
 cpu_usage = []
+cpu_perc = []
 for i in range(cpucores):
     app.grid_columnconfigure(i, weight=1)
     bar = ctk.CTkProgressBar(master=app, orientation="vertical", height=100, width=20, corner_radius=0)
     bar.grid(column=i, row=1, padx=10, pady=5)
+    text = ctk.CTkLabel(master=app)
+    text.grid(column=i, row=2, padx=5, pady=5)
     cpu_usage.append(bar)
+    cpu_perc.append(text)
+
+# Ram percent
+ram_info_label = ctk.CTkLabel(master=app)
+ram_info_label.grid(column=0, row=3, padx=10, pady=5, columnspan=cpucores)
+# Set up RAM usage chart
+RAM_history = [0]*15
+fig = Figure(figsize=(5, 4), dpi=100)
+ax = fig.add_subplot(111)
+RAM_canva = FigureCanvasTkAgg(fig, master=app)
+RAM_widget = RAM_canva.get_tk_widget()
+RAM_widget.grid(column=0, row=4, padx=10, pady=5, columnspan=cpucores)
 
 # Update CPU Usage
-def upd_cpu_usage():
-    for i,s in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
+def upd_usage():
+    # CPU
+    for i,s in enumerate(psutil.cpu_percent(percpu=True, interval=0.5)):
         cpu_usage[i].set(s/100)
-    app.after(500, upd_cpu_usage)
+        cpu_perc[i].configure(text=f"{s}%")
+    mem = psutil.virtual_memory()
+    # RAM
+    RAM_percent = mem.percent
+    ram_info_label.configure(text=f"RAM used: {mem.percent}%")
+    # RAM chart
+    RAM_history.pop(0)
+    RAM_history.append(mem.used/1024/1024/1024)
+    ax.clear()
+    ax.fill_between(range(len(RAM_history)), RAM_history, color="skyblue", alpha=0.5)
+    ax.set_ylim(0, mem.total/1024/1024/1024+1)
+
+    RAM_canva.draw()
+    app.after(500, upd_usage)
 
 # Functions
-upd_cpu_usage()
-
+upd_usage()
+RAM_canva.draw()
 app.mainloop()
