@@ -19,5 +19,7 @@ A live CPU and RAM monitoring tool with a clean graphical interface.
 git clone https://github.com/jcat-github/SystemMonitorUI
 cd SystemMonitorUI
 
+# Install dependencies
+pip install -r requirements.txt
 # Run the Python script
 python main.py
