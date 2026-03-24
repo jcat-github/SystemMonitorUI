@@ -62,7 +62,7 @@ fig = Figure(figsize=(3,1), dpi=100)
 ax = fig.add_subplot(111)
 RAM_canva = FigureCanvasTkAgg(fig, master=ram_info)
 RAM_widget = RAM_canva.get_tk_widget()
-pack(RAM_widget)
+RAM_widget.grid(column=1, row=0, rowspan=4, sticky="ew")
 
 # GPU 
 GPU_devices = nvitop.Device.all()
