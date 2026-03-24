@@ -56,12 +56,13 @@ ram_P = ctk.CTkLabel(master=ram_info)
 ram_P.grid(column=0, row=3)
 ram_T.configure(text=f"T: {B2MB(psutil.virtual_memory().total)}MB")
 # Set up RAM usage chart
+ram_info.columnconfigure(1, weight=1)
 RAM_history = [0]*15
 fig = Figure(figsize=(3,1), dpi=100)
 ax = fig.add_subplot(111)
 RAM_canva = FigureCanvasTkAgg(fig, master=ram_info)
 RAM_widget = RAM_canva.get_tk_widget()
-RAM_widget.grid(column=1, rowspan=4, row=0)
+RAM_widget.grid(column=1, rowspan=4, row=0, sticky="ew")
 
 # GPU 
 GPU_devices = nvitop.Device.all()
