@@ -29,6 +29,7 @@ pack(cpu_info_label)
 
 cpu_frame = ctk.CTkFrame(master=app)
 pack(cpu_frame)
+
 # add CPU usage bars and grid
 cpu_usage = []
 cpu_perc = []
