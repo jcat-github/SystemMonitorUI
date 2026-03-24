@@ -2,3 +2,4 @@ matplotlib
 py-cpuinfo
 psutil
 customtkinter
+nvitop
