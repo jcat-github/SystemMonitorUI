@@ -11,9 +11,14 @@ app = ctk.CTk()
 app.geometry("400x1000")
 app.title("System Resource Manager")
 
+# packing elements 
 def pack(element):
     element.pack(side="top", fill="x", expand=True)
     return None
+
+# bytes to megabytes
+def B2MB (bytes: int):
+    return round(bytes/1024/1024)
 
 # get CPU cores
 cpucores = psutil.cpu_count(logical=True)
@@ -36,17 +41,27 @@ for i in range(cpucores):
     cpu_usage.append(bar)
     cpu_perc.append(text)
 
-# Ram percent
-ram_info_label = ctk.CTkLabel(master=app)
-pack(ram_info_label)
 
+ram_info = ctk.CTkFrame(master=app)
+pack(ram_info)
+
+# Ram percent
+ram_T = ctk.CTkLabel(master=ram_info)
+ram_T.grid(column=0, row=0)
+ram_U = ctk.CTkLabel(master=ram_info)
+ram_U.grid(column=0, row=1)
+ram_F = ctk.CTkLabel(master=ram_info)
+ram_F.grid(column=0, row=2)
+ram_P = ctk.CTkLabel(master=ram_info)
+ram_P.grid(column=0, row=3)
+ram_T.configure(text=f"T: {B2MB(psutil.virtual_memory().total)}MB")
 # Set up RAM usage chart
 RAM_history = [0]*15
-fig = Figure(figsize=(5, 4), dpi=100)
+fig = Figure(figsize=(3,1), dpi=100)
 ax = fig.add_subplot(111)
-RAM_canva = FigureCanvasTkAgg(fig, master=app)
+RAM_canva = FigureCanvasTkAgg(fig, master=ram_info)
 RAM_widget = RAM_canva.get_tk_widget()
-pack(RAM_widget)
+RAM_widget.grid(column=1, rowspan=4, row=0)
 
 # GPU 
 GPU_devices = nvitop.Device.all()
@@ -60,6 +75,7 @@ pack(GPU_mem)
 pack(GPU_usage)
 pack(GPU_temp)
 pack(GPU_fanspeed)
+
 # Update CPU Usage
 def upd_usage():
     # CPU
@@ -70,7 +86,10 @@ def upd_usage():
     # RAM
     mem = psutil.virtual_memory()
     RAM_percent = mem.percent
-    ram_info_label.configure(text=f"RAM used: {mem.percent}%")
+    ram_P.configure(text=f"P: {mem.percent}%")
+    ram_U.configure(text=f"U: {B2MB(mem.used)}MB")
+    ram_F.configure(text=f"F: {B2MB(mem.free)}MB")
+
 
     # RAM chart
     RAM_history.pop(0)
@@ -78,6 +97,7 @@ def upd_usage():
     ax.clear()
     ax.fill_between(range(len(RAM_history)), RAM_history, color="skyblue", alpha=0.5)
     ax.set_ylim(0, mem.total/1024/1024/1024+1)
+    ax.axis('off')
     RAM_canva.draw()
     
     # GPU
